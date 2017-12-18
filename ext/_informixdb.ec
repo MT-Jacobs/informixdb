@@ -3285,13 +3285,17 @@ static PyObject* DatabaseError_init(PyObject* self, PyObject* args, PyObject* kw
     return NULL;
   }
 
+  PyObject *sqlcode_obj = PyInt_FromLong(sqlcode);
+  if (PyObject_SetAttrString(self, "sqlcode", sqlcode_obj)) {
+    Py_DECREF(sqlcode_obj);
+    return NULL;
+  }
+  Py_DECREF(sqlcode_obj);
+
   if (PyObject_SetAttrString(self, "action", action)) {
     return NULL;
   }
 
-  if (PyObject_SetAttrString(self, "sqlcode", PyInt_FromLong(sqlcode))) {
-    return NULL;
-  }
 
   if (PyObject_SetAttrString(self, "diagnostics", diags)) {
     return NULL;
@@ -3316,6 +3320,8 @@ static PyObject* DatabaseError_str(PyObject* self, PyObject* args)
   diags = PyObject_GetAttrString(self, "diagnostics");
   sqlerrm = PyObject_GetAttrString(self, "sqlerrm");
 
+  //By using N here, we steal the references to sqlcode and action.
+  //Calling Py_DECREF(a) then cleans them up for us.
   a = Py_BuildValue("(NN)", sqlcode, action);
   f = PyString_FromString("SQLCODE %d in %s: \n");
   str = PyString_Format(f, a);
@@ -3331,19 +3337,14 @@ static PyObject* DatabaseError_str(PyObject* self, PyObject* args)
     PyString_ConcatAndDel(&str, PyString_Format(f, a));
     Py_DECREF(a);
   }
-
+  Py_DECREF(diags);
   Py_DECREF(f);
 
   if (PyObject_IsTrue(sqlerrm)) {
     PyString_ConcatAndDel(&str, PyString_FromString("SQLERRM = "));
-    PyString_Concat(&str, sqlerrm);
+    PyString_ConcatAndDel(&str, sqlerrm); //DECREF sqlerrm
     PyString_ConcatAndDel(&str, PyString_FromString("\n"));
   }
-
-  Py_DECREF(action);
-  Py_DECREF(sqlcode);
-  Py_DECREF(diags);
-  Py_DECREF(sqlerrm);
 
   return str;
 }
