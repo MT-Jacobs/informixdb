@@ -3296,7 +3296,6 @@ static PyObject* DatabaseError_init(PyObject* self, PyObject* args, PyObject* kw
     return NULL;
   }
 
-
   if (PyObject_SetAttrString(self, "diagnostics", diags)) {
     return NULL;
   }
@@ -3342,9 +3341,10 @@ static PyObject* DatabaseError_str(PyObject* self, PyObject* args)
 
   if (PyObject_IsTrue(sqlerrm)) {
     PyString_ConcatAndDel(&str, PyString_FromString("SQLERRM = "));
-    PyString_ConcatAndDel(&str, sqlerrm); //DECREF sqlerrm
+    PyString_Concat(&str, sqlerrm);
     PyString_ConcatAndDel(&str, PyString_FromString("\n"));
   }
+  Py_DECREF(sqlerrm);
 
   return str;
 }
