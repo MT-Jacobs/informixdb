@@ -2,6 +2,7 @@
  *                Copyright (c) 1997 by IV DocEye AB
  *             Copyright (c) 1999 by Stephen J. Turner
  *               Copyright (c) 2006 by Carsten Haese
+ *                 Copyright (c) 2017 by NetworkIP
  *
  * By obtaining, using, and/or copying this software and/or its
  * associated documentation, you agree that you have read, understood,
